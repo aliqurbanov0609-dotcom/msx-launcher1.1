@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MSX Launcher</title>
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome for crisp vector icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #090c13;
+            color: #ffffff;
+            overflow: hidden;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        /* Ambient Background Image & Gradient overlay */
+        .bg-msx {
+            background: 
+                radial-gradient(circle at 50% 20%, rgba(20, 30, 60, 0.6) 0%, rgba(5, 7, 12, 0.95) 80%),
+                url('https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=1920&q=80') center/cover no-repeat;
+        }
+
+        /* Glassmorphism Card Style */
+        .msx-card {
+            background: rgba(15, 22, 36, 0.65);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            transition: all 0.25s cubic-bezier(0.25, 1, 0.5, 1);
+            position: relative;
+            outline: none;
+        }
+
+        /* Neon Color Schemes for Focused States */
+        .msx-card.focus-green:focus, .msx-card.focus-green.focused {
+            border-color: #10b981;
+            box-shadow: 0 0 25px rgba(16, 185, 129, 0.5), inset 0 0 15px rgba(16, 185, 129, 0.2);
+            transform: scale(1.03);
+            z-index: 20;
+        }
+        
+        .msx-card.focus-red:focus, .msx-card.focus-red.focused {
+            border-color: #ef4444;
+            box-shadow: 0 0 25px rgba(239, 68, 68, 0.5), inset 0 0 15px rgba(239, 68, 68, 0.2);
+            transform: scale(1.03);
+            z-index: 20;
+        }
+
+        .msx-card.focus-purple:focus, .msx-card.focus-purple.focused {
+            border-color: #a855f7;
+            box-shadow: 0 0 25px rgba(168, 85, 247, 0.5), inset 0 0 15px rgba(168, 85, 247, 0.2);
+            transform: scale(1.03);
+            z-index: 20;
+        }
+
+        .msx-card.focus-cyan:focus, .msx-card.focus-cyan.focused {
+            border-color: #06b6d4;
+            box-shadow: 0 0 25px rgba(6, 182, 212, 0.5), inset 0 0 15px rgba(6, 182, 212, 0.2);
+            transform: scale(1.03);
+            z-index: 20;
+        }
+
+        .msx-card.focus-teal:focus, .msx-card.focus-teal.focused {
+            border-color: #14b8a6;
+            box-shadow: 0 0 25px rgba(20, 184, 166, 0.5), inset 0 0 15px rgba(20, 184, 166, 0.2);
+            transform: scale(1.03);
+            z-index: 20;
+        }
+
+        .msx-card.focus-blue:focus, .msx-card.focus-blue.focused {
+            border-color: #3b82f6;
+            box-shadow: 0 0 25px rgba(59, 130, 246, 0.5), inset 0 0 15px rgba(59, 130, 246, 0.2);
+            transform: scale(1.03);
+            z-index: 20;
+        }
+
+        .msx-card.focus-orange:focus, .msx-card.focus-orange.focused {
+            border-color: #f97316;
+            box-shadow: 0 0 25px rgba(249, 115, 22, 0.5), inset 0 0 15px rgba(249, 115, 22, 0.2);
+            transform: scale(1.03);
+            z-index: 20;
+        }
+
+        .msx-card.focus-gold:focus, .msx-card.focus-gold.focused {
+            border-color: #eab308;
+            box-shadow: 0 0 25px rgba(234, 179, 8, 0.5), inset 0 0 15px rgba(234, 179, 8, 0.2);
+            transform: scale(1.03);
+            z-index: 20;
+        }
+
+        .msx-card.focus-magenta:focus, .msx-card.focus-magenta.focused {
+            border-color: #ec4899;
+            box-shadow: 0 0 25px rgba(236, 72, 153, 0.5), inset 0 0 15px rgba(236, 72, 153, 0.2);
+            transform: scale(1.03);
+            z-index: 20;
+        }
+
+        .msx-card.focus-power:focus, .msx-card.focus-power.focused {
+            border-color: #f43f5e;
+            box-shadow: 0 0 25px rgba(244, 63, 94, 0.6), inset 0 0 15px rgba(244, 63, 94, 0.3);
+            transform: scale(1.03);
+            z-index: 20;
+        }
+
+        /* Subtle glowing background graphics inside tiles */
+        .bg-glow-icon {
+            position: absolute;
+            right: -10%;
+            bottom: -10%;
+            opacity: 0.08;
+            font-size: 8rem;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .msx-card:focus .bg-glow-icon, .msx-card.focused .bg-glow-icon {
+            opacity: 0.18;
+        }
+
+        /* Pulsing animation for subtle live elements */
+        @keyframes pulseGlow {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
+        }
+        .pulse-live {
+            animation: pulseGlow 2s infinite ease-in-out;
+        }
+    </style>
+</head>
+<body class="bg-msx min-h-screen w-screen flex flex-col justify-between p-6 lg:p-8 select-none">
+
+    <!-- TOP HEADER -->
+    <header class="flex justify-between items-center w-full mb-4 px-2">
+        <!-- Logo and Branding -->
+        <div class="flex items-center space-x-4">
+            <div class="flex items-baseline space-x-1">
+                <span class="text-3xl lg:text-4xl font-extrabold tracking-wider text-white">MSX</span>
+            </div>
+            <div class="h-6 w-[2px] bg-cyan-500/50"></div>
+            <div class="text-xs lg:text-sm tracking-widest font-semibold text-cyan-400/90 leading-tight uppercase">
+                Your Media<br><span class="text-slate-400 font-normal">Your Rules</span>
+            </div>
+        </div>
+
+        <!-- Clock, Date & Status Icons -->
+        <div class="flex items-center space-x-6">
+            <div class="text-right">
+                <div id="clock" class="text-2xl lg:text-3xl font-bold tracking-tight text-white leading-none">22:45</div>
+                <div id="date" class="text-xs lg:text-sm font-medium text-slate-400 mt-0.5">20 Sep 2026 • Saturday</div>
+            </div>
+            <div class="flex items-center space-x-3 text-cyan-400 bg-slate-800/50 border border-slate-700/50 px-3 py-1.5 rounded-full">
+                <i class="fa-solid fa-wifi text-sm"></i>
+                <span class="text-xs font-semibold text-slate-300">ONLINE</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN LAUNCHER GRID (3 Rows x 4 Columns) -->
+    <main class="grid grid-cols-4 gap-4 lg:gap-5 my-auto w-full max-w-[1700px] mx-auto">
+        
+        <!-- 1. MUSIC (Spotify) -->
+        <button tabindex="0" data-app="music" onclick="openApp('Music', 'https://open.spotify.com')" class="msx-card focus-green rounded-2xl p-4 lg:p-5 flex flex-col justify-between h-36 lg:h-44 text-left group">
+            <div class="flex items-start justify-between w-full">
+                <div class="w-12 h-12 lg:w-14 lg:h-14 rounded-full bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 text-2xl lg:text-3xl">
+                    <i class="fa-brands fa-spotify"></i>
+                </div>
+                <i class="fa-solid fa-chevron-right text-slate-500 group-focus:text-emerald-400 text-lg transition-colors"></i>
+            </div>
+            <div>
+                <h2 class="text-xl lg:text-2xl font-bold text-white tracking-wide">Music</h2>
+                <p class="text-xs lg:text-sm text-emerald-400/80 font-medium">Spotify</p>
+            </div>
+            <i class="fa-brands fa-spotify bg-glow-icon text-emerald-400"></i>
+        </button>
+
+        <!-- 2. VIDEO (YouTube, VK) -->
+        <button tabindex="0" data-app="video" onclick="openApp('Video', 'https://youtube.com/tv')" class="msx-card focus-red rounded-2xl p-4 lg:p-5 flex flex-col justify-between h-36 lg:h-44 text-left group">
+            <div class="flex items-start justify-between w-full">
+                <div class="flex items-center space-x-2">
+                    <div class="w-12 h-12 lg:w-14 lg:h-14 rounded-2xl bg-red-500/20 border border-red-500/40 flex items-center justify-center text-red-500 text-2xl lg:text-3xl">
+                        <i class="fa-brands fa-youtube"></i>
+                    </div>
+                    <div class="w-8 h-8 rounded-lg bg-blue-600/30 border border-blue-400/40 flex items-center justify-center text-blue-400 text-xs font-bold">
+                        VK
+                    </div>
+                </div>
+                <i class="fa-solid fa-chevron-right text-slate-500 group-focus:text-red-400 text-lg transition-colors"></i>
+            </div>
+            <div>
+                <h2 class="text-xl lg:text-2xl font-bold text-white tracking-wide">Video</h2>
+                <p class="text-xs lg:text-sm text-slate-400 font-medium">YouTube • VK Video • Etc.</p>
+            </div>
+            <i class="fa-solid fa-play bg-glow-icon text-red-500"></i>
+        </button>
+
+        <!-- 3. FILMS (Lampa) -->
+        <button tabindex="0" data-app="films" onclick="openApp('Films', 'https://lampa.mx')" class="msx-card focus-purple rounded-2xl p-4 lg:p-5 flex flex-col justify-between h-36 lg:h-44 text-left group">
+            <div class="flex items-start justify-between w-full">
+                <div class="w-12 h-12 lg:w-14 lg:h-14 rounded-2xl bg-purple-500/20 border border-purple-500/40 flex items-center justify-center text-purple-400 text-2xl lg:text-3xl">
+                    <i class="fa-solid fa-film"></i>
+                </div>
+                <i class="fa-solid fa-chevron-right text-slate-500 group-focus:text-purple-400 text-lg transition-colors"></i>
+            </div>
+            <div>
+                <h2 class="text-xl lg:text-2xl font-bold text-white tracking-wide">Films</h2>
+                <p class="text-xs lg:text-sm text-purple-300/80 font-medium">Lampa</p>
+            </div>
+            <i class="fa-solid fa-compact-disc bg-glow-icon text-purple-400"></i>
+        </button>
+
+        <!-- 4. TV (IPTV) -->
+        <button tabindex="0" data-app="tv" onclick="openApp('TV Player', 'iptv')" class="msx-card focus-cyan rounded-2xl p-4 lg:p-5 flex flex-col justify-between h-36 lg:h-44 text-left group">
+            <div class="flex items-start justify-between w-full">
+                <div class="w-12 h-12 lg:w-14 lg:h-14 rounded-2xl bg-cyan-500/20 border border-cyan-500/40 flex items-center justify-center text-cyan-400 text-2xl lg:text-3xl">
+                    <i class="fa-solid fa-tv"></i>
+                </div>
+                <i class="fa-solid fa-chevron-right text-slate-500 group-focus:text-cyan-400 text-lg transition-colors"></i>
+            </div>
+            <div>
+                <h2 class="text-xl lg:text-2xl font-bold text-white tracking-wide">TV</h2>
+                <p class="text-xs lg:text-sm text-cyan-300/80 font-medium">IPTV / TV Player</p>
+            </div>
+            <i class="fa-solid fa-tv bg-glow-icon text-cyan-400"></i>
+        </button>
+
+        <!-- 5. APPS (TorrServe Matrix) -->
+        <button tabindex="0" data-app="apps" onclick="openApp('Apps Manager', 'torrserve')" class="msx-card focus-teal rounded-2xl p-4 lg:p-5 flex flex-col justify-between h-36 lg:h-44 text-left group">
+            <div class="flex items-start justify-between w-full">
+                <div class="w-12 h-12 lg:w-14 lg:h-14 rounded-2xl bg-teal-500/20 border border-teal-500/40 flex items-center justify-center text-teal-400 text-2xl lg:text-3xl">
+                    <i class="fa-solid fa-cubes"></i>
+                </div>
+                <i class="fa-solid fa-chevron-right text-slate-500 group-focus:text-teal-400 text-lg transition-colors"></i>
+            </div>
+            <div>
+                <h2 class="text-xl lg:text-2xl font-bold text-white tracking-wide">Apps</h2>
+                <p class="text-xs lg:text-sm text-teal-300/80 font-medium">TorrServe Matrix • Etc.</p>
+            </div>
+            <i class="fa-solid fa-box-open bg-glow-icon text-teal-400"></i>
+        </button>
+
+        <!-- 6. WEB (Browser) -->
+        <button tabindex="0" data-app="web" onclick="openApp('Web Browser', 'browser')" class="msx-card focus-blue rounded-2xl p-4 lg:p-5 flex flex-col justify-between h-36 lg:h-44 text-left group">
+            <div class="flex items-start justify-between w-full">
+                <div class="w-12 h-12 lg:w-14 lg:h-14 rounded-2xl bg-blue-500/20 border border-blue-500/40 flex items-center justify-center text-blue-400 text-2xl lg:text-3xl">
+                    <i class="fa-solid fa-globe"></i>
+                </div>
+                <i class="fa-solid fa-chevron-right text-slate-500 group-focus:text-blue-400 text-lg transition-colors"></i>
+            </div>
+            <div>
+                <h2 class="text-xl lg:text-2xl font-bold text-white tracking-wide">Web</h2>
+                <p class="text-xs lg:text-sm text-blue-300/80 font-medium">Browser</p>
+            </div>
+            <i class="fa-solid fa-network-wired bg-glow-icon text-blue-400"></i>
+        </button>
+
+        <!-- 7. GAMES -->
+        <button tabindex="0" data-app="games" onclick="openApp('Games Center', 'games')" class="msx-card focus-orange rounded-2xl p-4 lg:p-5 flex flex-col justify-between h-36 lg:h-44 text-left group">
+            <div class="flex items-start justify-between w-full">
+                <div class="w-12 h-12 lg:w-14 lg:h-14 rounded-2xl bg-orange-500/20 border border-orange-500/40 flex items-center justify-center text-orange-400 text-2xl lg:text-3xl">
+                    <i class="fa-solid fa-gamepad"></i>
+                </div>
+                <i class="fa-solid fa-chevron-right text-slate-500 group-focus:text-orange-400 text-lg transition-colors"></i>
+            </div>
+            <div>
+                <h2 class="text-xl lg:text-2xl font-bold text-white tracking-wide">Games</h2>
+                <p class="text-xs lg:text-sm text-orange-300/80 font-medium">Play & Enjoy</p>
+            </div>
+            <i class="fa-solid fa-headset bg-glow-icon text-orange-400"></i>
+        </button>
+
+        <!-- 8. FAVORITES -->
+        <button tabindex="0" data-app="favorites" onclick="openApp('Favorites', 'favorites')" class="msx-card focus-gold rounded-2xl p-4 lg:p-5 flex flex-col justify-between h-36 lg:h-44 text-left group">
+            <div class="flex items-start justify-between w-full">
+                <div class="w-12 h-12 lg:w-14 lg:h-14 rounded-2xl bg-yellow-500/20 border border-yellow-500/40 flex items-center justify-center text-yellow-400 text-2xl lg:text-3xl">
+                    <i class="fa-solid fa-star"></i>
+                </div>
+                <i class="fa-solid fa-chevron-right text-slate-500 group-focus:text-yellow-400 text-lg transition-colors"></i>
+            </div>
+            <div>
+                <h2 class="text-xl lg:text-2xl font-bold text-white tracking-wide">Favorites</h2>
+                <p class="text-xs lg:text-sm text-yellow-300/80 font-medium">Your Apps</p>
+            </div>
+            <i class="fa-solid fa-star bg-glow-icon text-yellow-400"></i>
+        </button>
+
+        <!-- 9. FILES -->
+        <button tabindex="0" data-app="files" onclick="openApp('File Manager', 'files')" class="msx-card focus-blue rounded-2xl p-4 lg:p-5 flex flex-col justify-between h-36 lg:h-44 text-left group">
+            <div class="flex items-start justify-between w-full">
+                <div class="w-12 h-12 lg:w-14 lg:h-14 rounded-2xl bg-sky-500/20 border border-sky-500/40 flex items-center justify-center text-sky-400 text-2xl lg:text-3xl">
+                    <i class="fa-solid fa-folder-open"></i>
+                </div>
+                <i class="fa-solid fa-chevron-right text-slate-500 group-focus:text-sky-400 text-lg transition-colors"></i>
+            </div>
+            <div>
+                <h2 class="text-xl lg:text-2xl font-bold text-white tracking-wide">Files</h2>
+                <p class="text-xs lg:text-sm text-sky-300/80 font-medium">File Manager</p>
+            </div>
+            <i class="fa-solid fa-hard-drive bg-glow-icon text-sky-400"></i>
+        </button>
+
+        <!-- 10. SETTINGS -->
+        <button tabindex="0" data-app="settings" onclick="openApp('Settings', 'settings')" class="msx-card focus-blue rounded-2xl p-4 lg:p-5 flex flex-col justify-between h-36 lg:h-44 text-left group">
+            <div class="flex items-start justify-between w-full">
+                <div class="w-12 h-12 lg:w-14 lg:h-14 rounded-2xl bg-indigo-500/20 border border-indigo-500/40 flex items-center justify-center text-indigo-400 text-2xl lg:text-3xl">
+                    <i class="fa-solid fa-gear"></i>
+                </div>
+                <i class="fa-solid fa-chevron-right text-slate-500 group-focus:text-indigo-400 text-lg transition-colors"></i>
+            </div>
+            <div>
+                <h2 class="text-xl lg:text-2xl font-bold text-white tracking-wide">Settings</h2>
+                <p class="text-xs lg:text-sm text-indigo-300/80 font-medium">System Settings</p>
+            </div>
+            <i class="fa-solid fa-sliders bg-glow-icon text-indigo-400"></i>
+        </button>
+
+        <!-- 11. TOOLS -->
+        <button tabindex="0" data-app="tools" onclick="openApp('Tools', 'tools')" class="msx-card focus-magenta rounded-2xl p-4 lg:p-5 flex flex-col justify-between h-36 lg:h-44 text-left group">
+            <div class="flex items-start justify-between w-full">
+                <div class="w-12 h-12 lg:w-14 lg:h-14 rounded-2xl bg-pink-500/20 border border-pink-500/40 flex items-center justify-center text-pink-400 text-2xl lg:text-3xl">
+                    <i class="fa-solid fa-screwdriver-wrench"></i>
+                </div>
+                <i class="fa-solid fa-chevron-right text-slate-500 group-focus:text-pink-400 text-lg transition-colors"></i>
+            </div>
+            <div>
+                <h2 class="text-xl lg:text-2xl font-bold text-white tracking-wide">Tools</h2>
+                <p class="text-xs lg:text-sm text-pink-300/80 font-medium">Useful Apps</p>
+            </div>
+            <i class="fa-solid fa-toolbox bg-glow-icon text-pink-400"></i>
+        </button>
+
+        <!-- 12. POWER -->
+        <button tabindex="0" data-app="power" onclick="openApp('Power Control', 'power')" class="msx-card focus-power rounded-2xl p-4 lg:p-5 flex flex-col justify-between h-36 lg:h-44 text-left group">
+            <div class="flex items-start justify-between w-full">
+                <div class="w-12 h-12 lg:w-14 lg:h-14 rounded-2xl bg-rose-500/20 border border-rose-500/40 flex items-center justify-center text-rose-500 text-2xl lg:text-3xl">
+                    <i class="fa-solid fa-power-off"></i>
+                </div>
+                <i class="fa-solid fa-chevron-right text-slate-500 group-focus:text-rose-400 text-lg transition-colors"></i>
+            </div>
+            <div>
+                <h2 class="text-xl lg:text-2xl font-bold text-white tracking-wide">Power</h2>
+                <p class="text-xs lg:text-sm text-rose-300/80 font-medium">Shutdown / Reboot</p>
+            </div>
+            <i class="fa-solid fa-power-off bg-glow-icon text-rose-500"></i>
+        </button>
+
+    </main>
+
+    <!-- BOTTOM FOOTER NAV BAR -->
+    <footer class="flex justify-between items-center w-full mt-4 px-2 text-slate-400 text-xs lg:text-sm font-medium">
+        <div class="flex items-center space-x-6">
+            <button onclick="openApp('Home', 'home')" class="flex items-center space-x-2 text-cyan-400 hover:text-white transition-colors focus:outline-none">
+                <i class="fa-solid fa-house"></i>
+                <span>Home</span>
+            </button>
+            <span class="text-slate-700">|</span>
+            <button onclick="openApp('Apps Menu', 'apps')" class="flex items-center space-x-2 hover:text-white transition-colors focus:outline-none">
+                <i class="fa-solid fa-grip"></i>
+                <span>Apps</span>
+            </button>
+            <span class="text-slate-700">|</span>
+            <button onclick="openApp('Search', 'search')" class="flex items-center space-x-2 hover:text-white transition-colors focus:outline-none">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <span>Search</span>
+            </button>
+            <span class="text-slate-700">|</span>
+            <button onclick="openApp('Settings', 'settings')" class="flex items-center space-x-2 hover:text-white transition-colors focus:outline-none">
+                <i class="fa-solid fa-gear"></i>
+                <span>Settings</span>
+            </button>
+        </div>
+
+        <div class="flex items-center space-x-3">
+            <div class="h-[1px] w-12 bg-slate-700"></div>
+            <span class="tracking-widest uppercase text-[10px] lg:text-xs text-slate-400">Life is better with MSX</span>
+            <div class="h-[1px] w-12 bg-slate-700"></div>
+        </div>
+    </footer>
+
+    <!-- ACTION / APPLICATION LAUNCH MODAL -->
+    <div id="appModal" class="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center opacity-0 pointer-events-none transition-all duration-300 z-50">
+        <div class="bg-slate-900 border border-slate-700/80 rounded-2xl p-6 lg:p-8 max-w-md w-full mx-4 shadow-2xl text-center transform scale-95 transition-all duration-300" id="modalBox">
+            <div id="modalIcon" class="w-16 h-16 rounded-full bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 flex items-center justify-center text-3xl mx-auto mb-4">
+                <i class="fa-solid fa-rocket"></i>
+            </div>
+            <h3 id="modalTitle" class="text-2xl font-bold text-white mb-2">Запуск приложения</h3>
+            <p id="modalDesc" class="text-slate-300 text-sm mb-6">Подключение к сервису Media Station X...</p>
+            
+            <div class="flex space-x-3 justify-center">
+                <button id="modalActionBtn" onclick="confirmLaunch()" class="bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-semibold px-5 py-2.5 rounded-xl text-sm transition-colors focus:ring-2 focus:ring-cyan-300 outline-none">
+                    Открыть
+                </button>
+                <button onclick="closeModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium px-5 py-2.5 rounded-xl text-sm transition-colors focus:ring-2 focus:ring-slate-500 outline-none">
+                    Закрыть (Esc)
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentTargetUrl = '';
+
+        // Realtime Clock Handler
+        function updateClock() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            document.getElementById('clock').textContent = `${hours}:${minutes}`;
+
+            const options = { day: 'numeric', month: 'short', year: 'numeric', weekday: 'long' };
+            const dateStr = now.toLocaleDateString('en-US', options);
+            const formattedDate = dateStr.replace(',', '');
+            document.getElementById('date').textContent = formattedDate;
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // Modal triggers
+        function openApp(title, target) {
+            const modal = document.getElementById('appModal');
+            const modalBox = document.getElementById('modalBox');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalDesc = document.getElementById('modalDesc');
+            const actionBtn = document.getElementById('modalActionBtn');
+
+            modalTitle.textContent = title;
+            currentTargetUrl = target;
+
+            if (target.startsWith('http')) {
+                modalDesc.textContent = `Перейти по внешнему адресу: ${target}`;
+                actionBtn.style.display = 'inline-block';
+            } else if (target === 'torrserve') {
+                modalDesc.textContent = 'Подключение к локальному серверу TorrServe Matrix (http://127.0.0.1:8090)';
+                actionBtn.style.display = 'inline-block';
+            } else if (target === 'power') {
+                modalDesc.textContent = 'Выберите действие: Перезапуск приложения или Выход из MSX.';
+                actionBtn.textContent = 'Перезапустить';
+                actionBtn.style.display = 'inline-block';
+            } else {
+                modalDesc.textContent = `Раздел "${title}" готов к интеграции через MSX JSON API.`;
+                actionBtn.style.display = 'none';
+            }
+
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+            modalBox.classList.remove('scale-95');
+            modalBox.classList.add('scale-100');
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('appModal');
+            const modalBox = document.getElementById('modalBox');
+            modal.classList.add('opacity-0', 'pointer-events-none');
+            modalBox.classList.remove('scale-100');
+            modalBox.classList.add('scale-95');
+        }
+
+        function confirmLaunch() {
+            if (currentTargetUrl.startsWith('http')) {
+                window.open(currentTargetUrl, '_blank');
+            } else if (currentTargetUrl === 'power') {
+                location.reload();
+            } else {
+                alert(`Запуск: ${currentTargetUrl}`);
+            }
+            closeModal();
+        }
+
+        // TV Remote Navigation (Arrow Keys)
+        const cards = Array.from(document.querySelectorAll('.msx-card'));
+        let currentIndex = 0;
+
+        function setFocus(index) {
+            if (index < 0) index = 0;
+            if (index >= cards.length) index = cards.length - 1;
+            cards[currentIndex].classList.remove('focused');
+            currentIndex = index;
+            cards[currentIndex].focus();
+            cards[currentIndex].classList.add('focused');
+        }
+
+        // Keyboard / D-Pad listener
+        document.addEventListener('keydown', (e) => {
+            const cols = 4;
+            const modal = document.getElementById('appModal');
+            const isModalOpen = !modal.classList.contains('opacity-0');
+
+            if (isModalOpen) {
+                if (e.key === 'Escape' || e.key === 'Backspace') {
+                    closeModal();
+                }
+                return;
+            }
+
+            switch(e.key) {
+                case 'ArrowRight':
+                    if ((currentIndex + 1) % cols !== 0) {
+                        setFocus(currentIndex + 1);
+                    }
+                    e.preventDefault();
+                    break;
+                case 'ArrowLeft':
+                    if (currentIndex % cols !== 0) {
+                        setFocus(currentIndex - 1);
+                    }
+                    e.preventDefault();
+                    break;
+                case 'ArrowDown':
+                    if (currentIndex + cols < cards.length) {
+                        setFocus(currentIndex + cols);
+                    }
+                    e.preventDefault();
+                    break;
+                case 'ArrowUp':
+                    if (currentIndex - cols >= 0) {
+                        setFocus(currentIndex - cols);
+                    }
+                    e.preventDefault();
+                    break;
+                case 'Enter':
+                    cards[currentIndex].click();
+                    e.preventDefault();
+                    break;
+                case 'Escape':
+                case 'Backspace':
+                    closeModal();
+                    e.preventDefault();
+                    break;
+            }
+        });
+
+        // Initialize focus on page load
+        window.addEventListener('load', () => {
+            setFocus(0);
+        });
+    </script>
+</body>
+</html>
